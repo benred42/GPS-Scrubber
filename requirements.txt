@@ -1,2 +1,1 @@
-jupyter
-pandas
+gpxpy==1.1.1
