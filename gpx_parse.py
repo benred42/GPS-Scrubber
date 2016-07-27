@@ -1,24 +1,11 @@
 import math
+import sys
 
 import gpxpy
 import gpxpy.gpx
 
 # Parsing an existing file:
 # -------------------------
-
-def distance(origin, destination):
-    lat1, lon1 = origin
-    lat2, lon2 = destination
-    radius = 6371000 # m
-
-    dlat = math.radians(lat2-lat1)
-    dlon = math.radians(lon2-lon1)
-    a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
-        * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    d = radius * c
-
-    return round(d, 2)
 
 def bearing(origin, destination):
     """
@@ -58,28 +45,33 @@ def bearing(origin, destination):
 
     return round(compass_bearing, 2)
 
-def main():
-    with open('xml_data.txt', 'r') as gpx_file:
+def main(filepath, max_dist, output_file):
+    with open(filepath, 'r') as gpx_file:
 
         gpx = gpxpy.parse(gpx_file)
 
         for track in gpx.tracks:
+            previous_point = track.segments[0].points[0]
             for segment in track.segments:
                 if segment.points:
-                    points = segment.points[1:]
-                    previous_point = segment.points[0]
-                    index = 1
+                    points = segment.points
+                    index = 0
                     for point in points:
-                        previous_coord = (previous_point.latitude, previous_point.longitude)
-                        current_coord = (point.latitude, point.longitude)
-                        print('DISTANCE: ' + str(distance(previous_coord, current_coord)) + 'm BEARING: ' + str(bearing(previous_coord, current_coord)) + ' degrees')
-                        if distance(previous_coord, current_coord) > 50:
+                        if point.distance_2d(previous_point) > float(max_dist):
                             segment.remove_point(index)
                         else:
+                            print('DISTANCE: ' +
+                            str(round(point.distance_2d(previous_point), 2)) +
+                            'm BEARING: ' +
+                            str(bearing(previous_coord, current_coord)) +
+                            ' degrees')
+
                             previous_point = point
-                        index += 1
-        with open('scrubbed.gpx', 'w+') as dest:
+                            index += 1
+
+        with open(output_file, 'w+') as dest:
             dest.write(gpx.to_xml())
 
 if __name__ == '__main__':
-    main()
+    print(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2])
