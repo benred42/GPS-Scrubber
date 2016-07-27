@@ -39,4 +39,4 @@ if __name__ == '__main__':
                         help='The path to the file to be written with the output'
                         )
     args = parser.parse_args()
-    main(sys.argv[1], sys.argv[2])
+    main(args.filepath, args.max_dist, args.output_file)
