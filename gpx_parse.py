@@ -1,5 +1,5 @@
+import argparse
 import math
-import sys
 
 import gpxpy
 import gpxpy.gpx
@@ -73,5 +73,15 @@ def main(filepath, max_dist, output_file):
             dest.write(gpx.to_xml())
 
 if __name__ == '__main__':
-    print(sys.argv[1], sys.argv[2])
+    parser = argparse.ArgumentParser(description = 'GPX File Scrubber')
+    parser.add_argument('filepath',
+                        help='The path to the gpx file to be scrubbed'
+                        )
+    parser.add_argument('max_dist',
+                        help='The maximum distance between points, in meters'
+                        )
+    parser.add_argument('output_file',
+                        help='The path to the file to be written with the output'
+                        )
+    args = parser.parse_args()
     main(sys.argv[1], sys.argv[2])
